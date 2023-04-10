@@ -1,9 +1,7 @@
-# импортируем модуль json для работы с данными
 import json
 import networkx as nx
 import matplotlib.pyplot as plt
 
-# загружаем данные из строки в переменную data
 data = json.loads("""
 [
   {
