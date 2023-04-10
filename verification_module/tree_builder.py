@@ -1,6 +1,7 @@
 # импортируем модуль json для работы с данными
 import json
 import networkx as nx
+import matplotlib.pyplot as plt
 
 # загружаем данные из строки в переменную data
 data = json.loads("""
@@ -10,7 +11,7 @@ data = json.loads("""
     "Text": "Требование 1",
     "Comment": "Комментарий 1",
     "Class": "B",
-    "Parent": null
+    "Parent": 4
   },
   {
     "ID": 2,
@@ -61,6 +62,15 @@ def find_cycles(graph):
     return cycles
 
 
+def draw_graph(graph):
+    G = nx.DiGraph()
+    for node in graph:
+        for child in graph[node]["Children"]:
+            G.add_edge(node, child)
+    nx.draw_networkx(G, with_labels=True)
+    plt.show()
+
+
 def find_self_referencing_nodes(graph):
     """функция для нахождения узлов, которые ссылаются на себя"""
     error_nodes = []
@@ -97,3 +107,5 @@ if __name__ == '__main__':
 
     print("Ошибка наследования:")
     print(find_B_to_F_nodes(graph))
+
+    draw_graph(graph)
