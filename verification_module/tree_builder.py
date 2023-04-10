@@ -55,7 +55,7 @@ def find_cycles(graph):
     G = nx.DiGraph()
     for node in graph:
         for child in graph[node]["Children"]:
-            G.add_edge(node, child)
+            G.add_edge(node, child, CLASS=graph[node]["Category"])
     cycles = list(nx.simple_cycles(G))
     return cycles
 
@@ -64,8 +64,16 @@ def draw_graph(graph):
     G = nx.DiGraph()
     for node in graph:
         for child in graph[node]["Children"]:
-            G.add_edge(node, child)
-    nx.draw_networkx(G, with_labels=True)
+            G.add_edge(node, child, Category=graph[node]["Category"])
+        G.nodes[node]["Children"] = graph[node]["Children"]
+        G.nodes[node]["Parent"] = graph[node]["Parent"]
+    pos = nx.spring_layout(G)
+    nx.draw_networkx(G, with_labels=True, pos=pos)
+    nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=nx.get_edge_attributes(G, "Category"))
+    node_labels = {}
+    for node in G.nodes:
+        node_labels[node] = f"Children: {G.nodes[node]['Children']}\nParent: {G.nodes[node]['Parent']}"
+    nx.draw_networkx_labels(G, pos=pos, labels=node_labels)
     plt.show()
 
 
