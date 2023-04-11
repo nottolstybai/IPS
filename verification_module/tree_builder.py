@@ -75,17 +75,13 @@ def draw_graph(graph):
     colors = {}
     for node in graph:
         category = graph[node]['Category']
-        # Создаем словарь меток id
         labels[node] = node
-        # Если категория еще не имеет цвета, генерируем случайный цвет
+
         if category not in colors:
             colors[category] = (random.random(), random.random(), random.random())
-    # Создаем список цветов для каждого узла в соответствии с его категорией
     node_colors = [colors[graph[node]['Category']] for node in graph]
     pos = nx.spring_layout(G)
-    # Передаем словарь меток id в параметр labels
     nx.draw(G, pos=pos, with_labels=True, labels=labels, node_color=node_colors, cmap='jet')
-    # Создаем подписи к категориям
     handles = []
     for category, color in colors.items():
         handles.append(plt.scatter([], [], color=color, label=category))
