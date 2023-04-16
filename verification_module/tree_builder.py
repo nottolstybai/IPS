@@ -11,14 +11,14 @@ data = json.loads("""
     "Text": "Требование 1",
     "Comment": "Комментарий 1",
     "Class": "F",
-    "Parent": 2
+    "Parent": null
   },
   {
     "ID": 2,
     "Text": "Требование 2",
     "Comment": "Комментарий 2",
     "Class": "B",
-    "Parent": 1
+    "Parent": 4
   },
   {
     "ID": 3,
@@ -67,21 +67,21 @@ def find_cycles(graph):
 
 def draw_graph(graph):
     G = nx.DiGraph()
-    for node in graph:
-        G.add_node(node)
-        for child in graph[node]['Children']:
-            G.add_edge(node, child)
     labels = {}
     colors = {}
     for node in graph:
         category = graph[node]['Category']
         labels[node] = node
-
         if category not in colors:
             colors[category] = (random.random(), random.random(), random.random())
+        G.add_node(node)
+    for node in graph:
+      for child in graph[node]['Children']:
+          G.add_edge(node, child)
     node_colors = [colors[graph[node]['Category']] for node in graph]
-    pos = nx.spring_layout(G)
-    nx.draw(G, pos=pos, with_labels=True, labels=labels, node_color=node_colors, cmap='jet')
+    pos = nx.spring_layout(G, seed=42) # добавить атрибут seed
+    sorted_pos = dict(sorted(pos.items())) # отсортировать словарь pos по ключам
+    nx.draw(G, pos=sorted_pos, with_labels=True, labels=labels, node_color=node_colors, cmap='jet') # использовать sorted_pos и sorted_node_colors
     handles = []
     for category, color in colors.items():
         handles.append(plt.scatter([], [], color=color, label=category))
@@ -99,6 +99,13 @@ def find_BNodes_to_notBnodes(graph):
                 error_nodes.append(node)
     return error_nodes
 
+def find_alone_Nodes(graph):
+  """функция для нахождения одиночных узлов"""
+  error_nodes = []
+  for node in graph:
+    if len(graph[node]['Children']) == 0 and graph[node]['Parent'] == None:
+      error_nodes.append(node)
+  return error_nodes
 
 if __name__ == '__main__':
     graph = create_graph(data)
@@ -113,5 +120,8 @@ if __name__ == '__main__':
 
     print("Ошибка наследования:")
     print(find_BNodes_to_notBnodes(graph))
+
+    print("Одиночные требования:")
+    print(find_alone_Nodes(graph))
 
     draw_graph(graph)
