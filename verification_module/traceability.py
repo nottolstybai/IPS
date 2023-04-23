@@ -1,5 +1,3 @@
-import json
-
 from verification_module.tree_builder import Graph
 
 
@@ -8,6 +6,9 @@ class TestCase:
         self.req_id = req_id
         self.test_steps = test_steps
         self.expected_results = expected_results
+
+    def __repr__(self):
+        return f"TestCase(req_id={self.req_id}, test_steps={self.test_steps}, expected_results={self.expected_results})"
 
 
 def append_test_cases(reqs_graph: Graph, test_cases: list[TestCase]):

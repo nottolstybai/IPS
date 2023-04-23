@@ -4,39 +4,6 @@ import random
 import matplotlib.pyplot as plt
 import networkx as nx
 
-data = json.loads("""
-[
-  {
-    "ID": 1,
-    "Text": "Требование 1",
-    "Comment": "Комментарий 1",
-    "Class": "F",
-    "Parent": null
-  },
-  {
-    "ID": 2,
-    "Text": "Требование 2",
-    "Comment": "Комментарий 2",
-    "Class": "B",
-    "Parent": 4
-  },
-  {
-    "ID": 3,
-    "Text": "Требование 3",
-    "Comment": null,
-    "Class": "F",
-    "Parent": 2
-  },
-  {
-    "ID": 4,
-    "Text": "Требование 4",
-    "Comment": null,
-    "Class": "F",
-    "Parent": 3
-  }
-]
-""")
-
 
 class Requirement:
     def __init__(self, id, category, parent):
@@ -50,10 +17,12 @@ class Requirement:
         self.tests.append(test_case)
 
     def __str__(self):
-        return f"Requirement(id={self.id}, category={self.category}, parent={self.parent}, tests={self.tests})"
+        return f"Requirement(id={self.id}, category={self.category}, parent={self.parent}, " \
+               f"tests={self.tests}, children={self.children})"
 
     def __repr__(self):
-        return f"Requirement(id={self.id}, category={self.category}, parent={self.parent}, tests={self.tests})"
+        return f"Requirement(id={self.id}, category={self.category}, parent={self.parent}, " \
+               f"tests={self.tests}, children={self.children})"
 
 
 class Graph:
@@ -61,6 +30,7 @@ class Graph:
         self.nodes = {}
 
     def add_node(self, node):
+        """Добавляет требование в граф"""
         if node.id not in self.nodes:
             self.nodes[node.id] = node
 
@@ -71,7 +41,8 @@ class Graph:
             self.add_node(Requirement(child, None, None))
         self.nodes[parent].children.append(child)
 
-    def create_from_data(self, data):
+    def create_from_data(self, data: dict):
+        """Метод для создания графа из данных в виде словаря содержащих требования"""
         for req in data:
             id = req["ID"]
             category = req["Class"]
@@ -140,14 +111,3 @@ class Graph:
 
     def __repr__(self):
         return f"Graph({len(self.nodes)} nodes)"
-
-
-if __name__ == '__main__':
-    graph1 = Graph()
-    graph1.create_from_data(data)
-    print(graph1)
-
-    print(graph1.find_alone_nodes())
-    print(graph1.find_cycles())
-    print(graph1.find_BNodes_to_notBnodes())
-    graph1.draw_graph()
