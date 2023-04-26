@@ -88,15 +88,11 @@ class Graph:
     def check_test_cases(self):
         """метод для нахождения требований, не покрытых тест кейсами"""
         incorrect_req = []
-        for key in self.nodes:
-            req = self.nodes[key]
+        for req_id, req in self.nodes.items():
             if not req.has_children():
-                if req.tests:
-                    for case in req.tests:
-                        if not (case.test_steps and case.expected_results):
-                            incorrect_req.append(req.id)
-                else:
-                    incorrect_req.append(req.id)
+                has_empty_case = any(not (case.test_steps and case.expected_results) for case in req.tests)
+                if not req.tests or has_empty_case:
+                    incorrect_req.append(req_id)
         return incorrect_req
 
     def draw_graph(self):
@@ -105,21 +101,19 @@ class Graph:
         labels = {}
         colors = {}
         for node in self.nodes:
-            category = self.nodes[node].category
+            req = self.nodes[node]
+            category = req.category
             labels[node] = node
             if category not in colors:
                 colors[category] = (random.random(), random.random(), random.random())
             G.add_node(node)
-        for node in self.nodes:
-            for child in self.nodes[node].children:
+            for child in req.children:
                 G.add_edge(node, child)
         node_colors = [colors[self.nodes[node].category] for node in self.nodes]
-        pos = nx.spring_layout(G, seed=42)  # добавить атрибут seed
-        sorted_pos = dict(sorted(pos.items()))  # отсортировать словарь pos по ключам
+        pos = nx.spring_layout(G, seed=42)
+        sorted_pos = dict(sorted(pos.items()))
         nx.draw(G, pos=sorted_pos, with_labels=True, labels=labels, node_color=node_colors, cmap='jet')
-        handles = []
-        for category, color in colors.items():
-            handles.append(plt.scatter([], [], color=color, label=category))
+        handles = [plt.scatter([], [], color=color, label=category) for category, color in colors.items()]
         plt.legend(handles=handles)
         plt.show()
 
