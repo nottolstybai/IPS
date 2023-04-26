@@ -1,5 +1,5 @@
-import json
 
+import json
 from verification_module.traceability import TestCase, append_test_cases
 from verification_module.tree_builder import Graph
 
@@ -43,62 +43,49 @@ data = json.loads("""
 ]
 """)
 test_case_data = [
-    {
-        "ID_req": 4,
-        "Test": {
-            "1": "1 шаг",
-            "2": "2 шаг",
-            "3": "3 шаг",
-            "4": "4 шаг"
-        },
-        "expected_result": [
-            "Результат 1",
-            "Результат 2",
-            "Результат 3"
-        ]
-    },
-    {
-        "ID_req": 5,
-        "Test": {
-            "1": "1 шаг",
-            "2": "2 шаг",
-            "3": "3 шаг",
-            "4": "4 шаг"
-        },
-        "expected_result": [
-            "Результат 1",
-            "Результат 2",
-            "Результат 3"
-        ]
-    },
-    {
-        "ID_req": 5,
-        "Test": {
-            "1": "1 шаг",
-            "2": "2 шаг",
-            "3": "3 шаг",
-            "4": "4 шаг"
-        },
-        "expected_result": [
-            "Результат 1",
-            "Результат 2",
-            "Результат 3"
-        ]
-    },
-    {
-        "ID_req": 4,
-        "Test": {
-            "1": "1 шаг",
-            "2": "2 шаг",
-            "3": "3 шаг",
-            "4": "4 шаг"
-        },
-        "expected_result": [
-            "Результат 1",
-            "Результат 2",
-            "Результат 3"
-        ]
-    }
+{
+  "ID_req": 3,
+  "Test": {
+    "1": "1 шаг",
+    "2": "2 шаг",
+    "3": "3 шаг",
+    "4": "4 шаг"
+  },
+  "expected_result": [
+    "Результат 1",
+    "Результат 2",
+    "Результат 3"
+  ]
+},
+{
+  "ID_req": 4,
+  "Test": {
+    "1": "1 шаг",
+    "2": "2 шаг",
+    "3": "3 шаг",
+    "4": "4 шаг"
+  },
+  "expected_result": [
+    "Результат 1",
+    "Результат 2",
+    "Результат 3"
+  ]
+},
+{
+  "ID_req": 5,
+  "Test": {
+    "1": "1 шаг",
+    "2": "2 шаг",
+    "3": "3 шаг",
+    "4": "4 шаг"
+  },
+  "expected_result": [
+    "Результат 1",
+    "Результат 2",
+    "Результат 3"
+  ]
+}
+
 ]
 
 
@@ -121,5 +108,8 @@ if __name__ == '__main__':
 
     append_test_cases(graph1, test_cases)
 
-    for key in graph1.nodes:
-        print(graph1.nodes[key].tests)
+
+    print(graph1.check_test_cases())
+
+
+

@@ -11,8 +11,9 @@ class TestCase:
         return f"TestCase(req_id={self.req_id}, test_steps={self.test_steps}, expected_results={self.expected_results})"
 
 
-def append_test_cases(reqs_graph: Graph, test_cases: list[TestCase]):
+def append_test_cases(reqs_graph: Graph, test_cases: list):
     """функция для связывания тест кейсов с требованиями"""
     for case in test_cases:
         req_node = reqs_graph.nodes[case.req_id]
         req_node.add_test(case)
+
