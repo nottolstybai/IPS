@@ -48,7 +48,7 @@ class Graph:
         """Метод для создания графа из данных в виде словаря содержащих требования"""
         for req in data:
             id = req["ID"]
-            category = req["Class"]
+            category = req["Category"]
             parent = req["Parent"]
             self.add_node(Requirement(id, category, parent))
             if parent is not None:
