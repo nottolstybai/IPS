@@ -68,7 +68,7 @@ test_case_data = [
     "3": "3 шаг",
     "4": "4 шаг"
   },
-  "expected_result": [
+  "expected_results": [
     "Результат 1",
     "Результат 2",
     "Результат 3"
@@ -82,7 +82,7 @@ test_case_data = [
     "3": "3 шаг",
     "4": "4 шаг"
   },
-  "expected_result": [
+  "expected_results": [
     "Результат 1",
     "Результат 2",
     "Результат 3"
@@ -96,7 +96,7 @@ test_case_data = [
     "3": "3 шаг",
     "4": "4 шаг"
   },
-  "expected_result": [
+  "expected_results": [
     "Результат 1",
     "Результат 2",
     "Результат 3"
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     for test_data in test_case_data:
         test_case = TestCase(req_id=test_data["ID_req"],
                              test_steps=test_data["Test"],
-                             expected_results=test_data["expected_result"])
+                             expected_results=test_data["expected_results"])
         test_cases.append(test_case)
 
     append_test_cases(graph1, test_cases)
