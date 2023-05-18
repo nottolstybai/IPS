@@ -1,7 +1,6 @@
 """В данном файле хранится код, отвечающий за функциональность 1-го и 2-го модулей
     Тут происходит анализ присланных требований и построение на их основе графа (дерева), с которым в дальнейшем и происходит работа и проверка на различные иключительные ситуации"""
-
-import json
+import io
 import random
 
 import matplotlib.pyplot as plt
@@ -59,7 +58,7 @@ class Graph:
             if id in self.nodes and self.nodes[id].category is None and self.nodes[id].parent is None:
                 self.nodes[id].category = category
                 self.nodes[id].parent = parent
-        return self
+        return
 
     def find_BNodes_to_notBnodes(self):
         """метод для нахождения узлов класса B, не ссылающихся на узлы класса B"""
@@ -118,7 +117,11 @@ class Graph:
         nx.draw(G, pos=sorted_pos, with_labels=True, labels=labels, node_color=node_colors, cmap='jet')
         handles = [plt.scatter([], [], color=color, label=category) for category, color in colors.items()]
         plt.legend(handles=handles)
+
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
         plt.show()
+        return buffer
 
     def __str__(self):
         return f"Graph(nodes={self.nodes})"
