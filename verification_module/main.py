@@ -9,7 +9,7 @@ data = json.loads("""
     "ID": 1,
     "Text": "Требование 1",
     "Comment": "Комментарий 1",
-    "Category": "F",
+    "Category": "B",
     "Parent": null
   },
   {

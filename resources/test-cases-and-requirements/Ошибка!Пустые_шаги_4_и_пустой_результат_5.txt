@@ -3,35 +3,35 @@
     "ID": 1,
     "Text": "Требование 1",
     "Comment": "Комментарий 1",
-    "Class": "F",
+    "Category": "B",
     "Parent": null
   },
   {
     "ID": 2,
     "Text": "Требование 2",
     "Comment": "Комментарий 2",
-    "Class": "B",
+    "Category": "B",
     "Parent": 1
   },
   {
     "ID": 3,
     "Text": "Требование 3",
     "Comment": null,
-    "Class": "F",
+    "Category": "F",
     "Parent": 1
   },
   {
     "ID": 4,
     "Text": "Требование 4",
     "Comment": null,
-    "Class": "F",
+    "Category": "F",
     "Parent": 2
   },
   {
     "ID": 5,
     "Text": "Требование 5",
     "Comment": null,
-    "Class": "F",
+    "Category": "F",
     "Parent": 2
   }
 ]

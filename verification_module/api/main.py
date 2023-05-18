@@ -18,9 +18,18 @@ def graph_init(reqs: list[InitialRequirement]):
 @app.post("/api/v1/module1")
 async def check_reqs(reqs: list[InitialRequirement]):
     graph = graph_init(reqs)
-    failed_nodes = {"alone_req_ids": graph.find_alone_nodes(),
-                    "cycled_req_ids": graph.find_cycles(),
-                    "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes()}
+
+    error1 = graph.find_alone_nodes()
+    error2 = graph.find_cycles()
+    error3 = graph.find_BNodes_to_notBnodes()
+
+    status = (len(error1) + len(error2) + len(error3)) == 0
+
+    failed_nodes = {
+        "status": status
+        "alone_req_ids": error1,
+        "cycled_req_ids": error2,
+        "wrong_hierarchy_req_ids": error3}
 
     return failed_nodes
 
@@ -37,7 +46,11 @@ async def check_test_cases(reqs_and_tests: ReqsAndTests):
         test_cases.append(test_case)
 
     append_test_cases(graph, test_cases)
-    return {"not_covered_tests": graph.check_test_cases()}
+    error1 = graph.check_test_cases()
+    status = len(error1) == 0;
+    return {
+        "status": status
+        "not_covered_tests": graph.check_test_cases()}
 
 
 if __name__ == '__main__':
