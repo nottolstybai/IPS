@@ -55,7 +55,7 @@ async def check_test_cases(reqs_and_tests: ReqsAndTests):
     status = len(error1) == 0;
     return {
         "status": status
-        "not_covered_tests": graph.check_test_cases()}
+        "not_covered_tests": error1}
 
 
 if __name__ == '__main__':
