@@ -43,7 +43,6 @@ async def upload_full_report(reqs_and_tests: ReqsAndTests):
                     "cycled_req_ids": graph.find_cycles(),
                     "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes(),
                     "not_covered_tests": graph.check_test_cases()}
-    print(graph)
 
     reporter = ReporterPDF(graph, **failed_nodes)
     report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'export', 'output', 'full_report.pdf')
