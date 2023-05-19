@@ -1,27 +1,20 @@
 """Данный файл отвечает за оборачивание всего написанного функционала по 1 и 2 модулям в API,
-к которому будут отправляться запросы,
-    для комплексной проверки требований (1 модуль)
-    для комплексной проверки покрытия требований тест-кейсами (2 модуль)"""
+   к которому будут отправляться запросы,
+   для комплексной проверки требований (1 модуль)
+   для комплексной проверки покрытия требований тест-кейсами (2 модуль)"""
 
 import uvicorn
 from fastapi import FastAPI
+from starlette.responses import Response
 
 from verification_module.api.models import InitialRequirement, ReqsAndTests
-from verification_module.traceability import TestCase, append_test_cases
-from verification_module.tree_builder import Graph
+from verification_module.api.utils import graph_init, check_test_cases, create_report, run_test_case_validation
 
 app = FastAPI()
 
 
-def graph_init(reqs: list[InitialRequirement]):
-    data = [req.__dict__ for req in reqs]
-    graph = Graph()
-    graph.create_from_data(data)
-    return graph
-
-
 @app.post("/api/v1/module1")
-async def check_reqs(reqs: list[InitialRequirement]):
+async def get_failed_reqs(reqs: list[InitialRequirement]):
     graph = graph_init(reqs)
 
     error1 = graph.find_alone_nodes()
@@ -38,21 +31,52 @@ async def check_reqs(reqs: list[InitialRequirement]):
 
 
 @app.post("/api/v1/module2")
-async def check_test_cases(reqs_and_tests: ReqsAndTests):
+async def get_not_covered_tests(reqs_and_tests: ReqsAndTests):
     graph = graph_init(reqs_and_tests.reqs)
     test_case_data = [test.__dict__ for test in reqs_and_tests.tests]
-    test_cases = []
-    for test_data in test_case_data:
-        test_case = TestCase(req_id=test_data["ID_req"],
-                             test_steps=test_data["Test"],
-                             expected_results=test_data["expected_result"])
-        test_cases.append(test_case)
-
-    append_test_cases(graph, test_cases)
+    check_test_cases(graph, test_case_data)
     error1 = graph.check_test_cases()
     return {
         "status": not error1,
         "not_covered_tests": error1}
+
+
+@app.post("/api/v1/upload/report_module1")
+async def upload_report_module1(reqs: list[InitialRequirement]):
+    graph = graph_init(reqs)
+    failed_nodes = {"alone_req_ids": graph.find_alone_nodes(),
+                    "cycled_req_ids": graph.find_cycles(),
+                    "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes()}
+
+    contents = create_report(graph, failed_nodes, '../export/output/report_module1')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
+
+
+@app.post("/api/v1/upload/report_module2")
+async def upload_report_module2(reqs_and_tests: ReqsAndTests):
+    graph = run_test_case_validation(reqs_and_tests)
+    failed_nodes = {"not_covered_tests": graph.check_test_cases()}
+
+    contents = create_report(graph, failed_nodes, '../export/output/report_module2')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
+
+
+@app.post("/api/v1/upload/full_report")
+async def upload_full_report(reqs_and_tests: ReqsAndTests):
+    graph = run_test_case_validation(reqs_and_tests)
+    failed_nodes = {"alone_req_ids": graph.find_alone_nodes(),
+                    "cycled_req_ids": graph.find_cycles(),
+                    "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes(),
+                    "not_covered_tests": graph.check_test_cases()}
+
+    contents = create_report(graph, failed_nodes, '../export/output/full_report.pdf')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
 
 
 if __name__ == '__main__':
