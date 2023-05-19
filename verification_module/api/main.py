@@ -28,10 +28,8 @@ async def check_reqs(reqs: list[InitialRequirement]):
     error2 = graph.find_cycles()
     error3 = graph.find_BNodes_to_notBnodes()
 
-    status = (len(error1) + len(error2) + len(error3)) == 0
-
     failed_nodes = {
-        "status": status,
+        "status": not (error1 + error2 + error3),
         "alone_req_ids": error1,
         "cycled_req_ids": error2,
         "wrong_hierarchy_req_ids": error3}
@@ -52,9 +50,8 @@ async def check_test_cases(reqs_and_tests: ReqsAndTests):
 
     append_test_cases(graph, test_cases)
     error1 = graph.check_test_cases()
-    status = len(error1) == 0;
     return {
-        "status": status,
+        "status": not error1,
         "not_covered_tests": error1}
 
 
