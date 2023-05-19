@@ -1,16 +1,14 @@
 """Данный файл отвечает за оборачивание всего написанного функционала по 1 и 2 модулям в API,
-к которому будут отправляться запросы,
-    для комплексной проверки требований (1 модуль)
-    для комплексной проверки покрытия требований тест-кейсами (2 модуль)"""
-import os
+   к которому будут отправляться запросы,
+   для комплексной проверки требований (1 модуль)
+   для комплексной проверки покрытия требований тест-кейсами (2 модуль)"""
 
 import uvicorn
 from fastapi import FastAPI
 from starlette.responses import Response
 
 from verification_module.api.models import InitialRequirement, ReqsAndTests
-from verification_module.api.utils import graph_init, check_test_cases
-from verification_module.export.reporter import ReporterPDF
+from verification_module.api.utils import graph_init, check_test_cases, create_report, run_test_case_validation
 
 app = FastAPI()
 
@@ -43,26 +41,43 @@ async def get_not_covered_tests(reqs_and_tests: ReqsAndTests):
         "not_covered_tests": error1}
 
 
+@app.post("/api/v1/upload/report_module1")
+async def upload_report_module1(reqs: list[InitialRequirement]):
+    graph = graph_init(reqs)
+    failed_nodes = {"alone_req_ids": graph.find_alone_nodes(),
+                    "cycled_req_ids": graph.find_cycles(),
+                    "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes()}
+
+    contents = create_report(graph, failed_nodes, '../export/output/report_module1')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
+
+
+@app.post("/api/v1/upload/report_module2")
+async def upload_report_module2(reqs_and_tests: ReqsAndTests):
+    graph = run_test_case_validation(reqs_and_tests)
+    failed_nodes = {"not_covered_tests": graph.check_test_cases()}
+
+    contents = create_report(graph, failed_nodes, '../export/output/report_module2')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
+
+
 @app.post("/api/v1/upload/full_report")
 async def upload_full_report(reqs_and_tests: ReqsAndTests):
-    graph = graph_init(reqs_and_tests.reqs)
-    test_case_data = [test.__dict__ for test in reqs_and_tests.tests]
-    check_test_cases(graph, test_case_data)
-
+    graph = run_test_case_validation(reqs_and_tests)
     failed_nodes = {"alone_req_ids": graph.find_alone_nodes(),
                     "cycled_req_ids": graph.find_cycles(),
                     "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes(),
                     "not_covered_tests": graph.check_test_cases()}
 
-    reporter = ReporterPDF(graph, **failed_nodes)
-    report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'export', 'output', 'full_report.pdf')
-    reporter.create_artifact(report_path)
-
-    with open(report_path, "rb") as file:
-        contents = file.read()
+    contents = create_report(graph, failed_nodes, '../export/output/full_report.pdf')
     response = Response(content=contents, media_type="application/pdf")
     response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
     return response
+
 
 if __name__ == '__main__':
     uvicorn.run("main:app", host="localhost", port=8080)

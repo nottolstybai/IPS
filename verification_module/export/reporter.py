@@ -22,29 +22,32 @@ class ReporterPDF(Reporter):
     def __init__(
             self,
             graph: Graph,
-            alone_req_ids: list,
-            cycled_req_ids: list,
-            wrong_hierarchy_req_ids: list,
-            not_covered_tests: list
+            alone_req_ids: list = None,
+            cycled_req_ids: list = None,
+            wrong_hierarchy_req_ids: list = None,
+            not_covered_tests: list = None
     ):
         super().__init__(graph)
         self.alone_req_ids = alone_req_ids
         self.cycled_req_ids = cycled_req_ids
         self.wrong_hierarchy_req_ids = wrong_hierarchy_req_ids
-        self.no_tests_reqs = not_covered_tests
+        self.not_covered_tests = not_covered_tests
 
     def create_artifact(self, artifact_name: str):
         self.setup_canvas(artifact_name)
         self.add_title("REPORT")
         self.y_axis -= 20
-        self.add_section("Verify requirements", [
-            f"Ids of alone requirements without links: {', '.join(map(str, self.alone_req_ids))}",
-            f"Ids of looped requirements: {', '.join(map(str, self.cycled_req_ids))}",
-            f"Ids of requirements with a wrong hierarchy: {', '.join(map(str, self.wrong_hierarchy_req_ids))}"
-        ])
-        self.add_section("Check testcases", [
-            f"Ids of uncovered by tests requirements: {', '.join(map(str, self.alone_req_ids))}"
-        ])
+
+        if self.alone_req_ids or self.cycled_req_ids or self.wrong_hierarchy_req_ids:
+            self.add_section("Verify requirements", [
+                f"Ids of alone requirements without links: {', '.join(map(str, self.alone_req_ids))}",
+                f"Ids of looped requirements: {', '.join(map(str, self.cycled_req_ids))}",
+                f"Ids of requirements with a wrong hierarchy: {', '.join(map(str, self.wrong_hierarchy_req_ids))}"
+            ])
+        if self.not_covered_tests:
+            self.add_section("Check testcases", [
+                f"Ids of uncovered by tests requirements: {', '.join(map(str, self.not_covered_tests))}"
+            ])
         self.add_title("Requirements graph")
         self.add_image(self.graph.draw_graph())
 
