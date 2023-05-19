@@ -31,7 +31,7 @@ async def check_reqs(reqs: list[InitialRequirement]):
     status = (len(error1) + len(error2) + len(error3)) == 0
 
     failed_nodes = {
-        "status": status
+        "status": status,
         "alone_req_ids": error1,
         "cycled_req_ids": error2,
         "wrong_hierarchy_req_ids": error3}
@@ -54,7 +54,7 @@ async def check_test_cases(reqs_and_tests: ReqsAndTests):
     error1 = graph.check_test_cases()
     status = len(error1) == 0;
     return {
-        "status": status
+        "status": status,
         "not_covered_tests": error1}
 
 
