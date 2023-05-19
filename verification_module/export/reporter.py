@@ -38,13 +38,14 @@ class ReporterPDF(Reporter):
         self.add_title("REPORT")
         self.y_axis -= 20
 
-        if self.alone_req_ids or self.cycled_req_ids or self.wrong_hierarchy_req_ids:
+        if self.alone_req_ids is not None or self.cycled_req_ids is not None or \
+                self.wrong_hierarchy_req_ids is not None:
             self.add_section("Verify requirements", [
                 f"Ids of alone requirements without links: {', '.join(map(str, self.alone_req_ids))}",
                 f"Ids of looped requirements: {', '.join(map(str, self.cycled_req_ids))}",
                 f"Ids of requirements with a wrong hierarchy: {', '.join(map(str, self.wrong_hierarchy_req_ids))}"
             ])
-        if self.not_covered_tests:
+        if self.not_covered_tests is not None:
             self.add_section("Check testcases", [
                 f"Ids of uncovered by tests requirements: {', '.join(map(str, self.not_covered_tests))}"
             ])
