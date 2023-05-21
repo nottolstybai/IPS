@@ -45,7 +45,7 @@
     "3": "3 шаг",
     "4": "4 шаг"
   },
-  "expected_result": [
+  "expected_results": [
     "Результат 1",
     "Результат 2",
     "Результат 3"
@@ -54,7 +54,7 @@
 {
   "ID_req": 4,
   "Test": {},
-  "expected_result": [
+  "expected_results": [
     "Результат 1",
     "Результат 2",
     "Результат 3"
@@ -68,7 +68,7 @@
     "3": "3 шаг",
     "4": "4 шаг"
   },
-  "expected_result": []
+  "expected_results": []
 }
 
 ]
