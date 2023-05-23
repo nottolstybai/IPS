@@ -14,6 +14,23 @@ class InitialRequirement(BaseModel):
     Category: str | None
     Parent: int | None
 
+class InitialFileGit(BaseModel):
+    branchID: int | None
+    filePath: str | None
+    versionId: int | None
+
+
+
+
+def from_dict_ir(d):
+    ir = InitialRequirement({})
+    ir.__dict__.update(d)
+    return ir
+
+def from_dict_it(d):
+    it = InitialTestCase({})
+    it.__dict__.update(d)
+    return it
 
 class InitialTestCase(BaseModel):
     ID_req: int
@@ -24,3 +41,8 @@ class InitialTestCase(BaseModel):
 class ReqsAndTests(BaseModel):
     reqs: list[InitialRequirement]
     tests: list[InitialTestCase]
+
+
+class ReqsAndTestsFile(BaseModel):
+    reqs: list[InitialFileGit]
+    tests: list[InitialFileGit]
