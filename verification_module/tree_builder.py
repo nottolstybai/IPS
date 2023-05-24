@@ -14,6 +14,7 @@ class Requirement:
         self.parent = parent
         self.tests = []
         self.children = []
+        self.is_tested = None
 
     def add_test(self, test_case):
         self.tests.append(test_case)

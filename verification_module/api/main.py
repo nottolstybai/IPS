@@ -2,10 +2,12 @@
    к которому будут отправляться запросы,
    для комплексной проверки требований (1 модуль)
    для комплексной проверки покрытия требований тест-кейсами (2 модуль)"""
+import os
 
 import uvicorn
 import json
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from starlette.responses import Response
 
 import verification_module.api.models
@@ -80,6 +82,19 @@ async def get_not_covered_tests(reqs_and_tests: ReqsAndTests):
     return {
         "status": not error1,
         "not_covered_tests": error1}
+
+
+@app.post("/api/v1/upload/reqs_tests_crosstab")
+async def get_reqs_tests_excel(reqs_and_tests: ReqsAndTests):
+    graph = graph_init(reqs_and_tests.reqs)
+    test_case_data = [test.__dict__ for test in reqs_and_tests.tests]
+
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'export', 'output', 'reqs_tests.xlsx')
+
+    df = check_test_cases(graph, test_case_data)
+    df.to_excel(path)
+    return FileResponse(path,
+                        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @app.post("/api/v1/upload/report_module1")

@@ -1,5 +1,7 @@
 import os
 
+import pandas as pd
+
 from verification_module.api.models import InitialRequirement, ReqsAndTests
 from verification_module.export.reporter import ReporterPDF
 from verification_module.traceability import append_test_cases, TestCase
@@ -13,7 +15,7 @@ def graph_init(reqs: list[InitialRequirement]) -> Graph:
     return graph
 
 
-def check_test_cases(graph: Graph, test_case_data: list) -> Graph:
+def check_test_cases(graph: Graph, test_case_data: list) -> pd.DataFrame:
     test_cases = []
     for test_data in test_case_data:
         test_case = TestCase(req_id=test_data["ID_req"],
@@ -21,7 +23,22 @@ def check_test_cases(graph: Graph, test_case_data: list) -> Graph:
                              expected_results=test_data["expected_results"])
         test_cases.append(test_case)
     append_test_cases(graph, test_cases)
-    return graph
+
+    tests_by_reqs = []
+    for req_id in graph.nodes:
+        req_tests = graph.nodes[req_id].tests
+        test_ids = [test.test_id for test in req_tests]
+        tests_by_reqs.append(test_ids)
+
+    req_vs_test = pd.DataFrame()
+    req_vs_test["Requirements"] = graph.nodes.keys()
+    req_vs_test["TestCases"] = tests_by_reqs
+
+    df = req_vs_test.explode("TestCases")
+    df = df.pivot(index="Requirements", columns="TestCases", values="Requirements")
+    df = df.fillna("")
+    df.columns.name = None
+    return df.mask(df != "", "X")
 
 
 def run_test_case_validation(reqs_and_tests: ReqsAndTests):
