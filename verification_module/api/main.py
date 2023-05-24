@@ -58,8 +58,10 @@ async def get_failed_reqs_git(filelist: list[InitialFileGit]):
 async def get_not_covered_tests_git(filelist: ReqsAndTestsFile):
     file_req = filelist["reqs"]
     file_test = filelist["tests"]
-    reqs = [from_dict_ir(json.loads(s)) for s in file_req]
-    tests = [from_dict_it(json.loads(s)) for s in file_test]
+    content_reqs = [get_file_version_content(x.branchID, x.filePath, x.versionId) for x in file_req]
+    content_test = [get_file_version_content(x.branchID, x.filePath, x.versionId) for x in file_test]
+    reqs = [from_dict_ir(json.loads(s)) for s in content_reqs]
+    tests = [from_dict_it(json.loads(s)) for s in content_test]
     reqs_and_tests = ReqsAndTests(reqs=reqs, tests=tests)
     graph = run_test_case_validation(reqs_and_tests)
     error1 = graph.check_test_cases()
