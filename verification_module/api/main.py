@@ -5,13 +5,15 @@
 import os
 
 import uvicorn
+import json
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from starlette.responses import Response
 
-from verification_module.api.models import InitialRequirement, ReqsAndTests
+import verification_module.api.models
+from verification_module.api.models import InitialRequirement, ReqsAndTests, InitialFileGit, from_dict_ir, from_dict_it, ReqsAndTestsFile
 from verification_module.api.utils import graph_init, check_test_cases, create_report, run_test_case_validation
-
+from verification_module.api.grpc.file_from_git import get_file_version_content
 app = FastAPI()
 
 
@@ -30,6 +32,45 @@ async def get_failed_reqs(reqs: list[InitialRequirement]):
         "wrong_hierarchy_req_ids": error3}
 
     return failed_nodes
+
+
+@app.post("/api/v1/module1_git")
+async def get_failed_reqs_git(filelist: list[InitialFileGit]):
+    content_list = [get_file_version_content(x.branchID, x.filePath, x.versionId) for x in filelist]
+    reqs = [from_dict_ir(json.loads(s)) for s in content_list]
+    graph = graph_init(reqs)
+
+    error1 = graph.find_alone_nodes()
+    error2 = graph.find_cycles()
+    error3 = graph.find_BNodes_to_notBnodes()
+
+    failed_nodes = {
+        "status": not (error1 + error2 + error3),
+        "alone_req_ids": error1,
+        "cycled_req_ids": error2,
+        "wrong_hierarchy_req_ids": error3}
+
+    contents = create_report(graph, failed_nodes, '../export/output/report_module1')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
+
+
+@app.post("/api/v1/module2_git")
+async def get_not_covered_tests_git(filelist: ReqsAndTestsFile):
+    file_req = filelist["reqs"]
+    file_test = filelist["tests"]
+    reqs = [from_dict_ir(json.loads(s)) for s in file_req]
+    tests = [from_dict_it(json.loads(s)) for s in file_test]
+    reqs_and_tests = ReqsAndTests(reqs=reqs, tests=tests)
+    graph = run_test_case_validation(reqs_and_tests)
+    error1 = graph.check_test_cases()
+    failed_nodes = {"status": not error1, "not_covered_tests": error1}
+
+    contents = create_report(graph, failed_nodes, '../export/output/report_module2')
+    response = Response(content=contents, media_type="application/pdf")
+    response.headers["Content-Disposition"] = "attachment; filename=output.pdf"
+    return response
 
 
 @app.post("/api/v1/module2")
@@ -59,9 +100,15 @@ async def get_reqs_tests_excel(reqs_and_tests: ReqsAndTests):
 @app.post("/api/v1/upload/report_module1")
 async def upload_report_module1(reqs: list[InitialRequirement]):
     graph = graph_init(reqs)
-    failed_nodes = {"alone_req_ids": graph.find_alone_nodes(),
-                    "cycled_req_ids": graph.find_cycles(),
-                    "wrong_hierarchy_req_ids": graph.find_BNodes_to_notBnodes()}
+    error1 = graph.find_alone_nodes()
+    error2 = graph.find_cycles()
+    error3 = graph.find_BNodes_to_notBnodes()
+
+    failed_nodes = {
+        "status": not (error1 + error2 + error3),
+        "alone_req_ids": error1,
+        "cycled_req_ids": error2,
+        "wrong_hierarchy_req_ids": error3}
 
     contents = create_report(graph, failed_nodes, '../export/output/report_module1')
     response = Response(content=contents, media_type="application/pdf")
@@ -72,7 +119,8 @@ async def upload_report_module1(reqs: list[InitialRequirement]):
 @app.post("/api/v1/upload/report_module2")
 async def upload_report_module2(reqs_and_tests: ReqsAndTests):
     graph = run_test_case_validation(reqs_and_tests)
-    failed_nodes = {"not_covered_tests": graph.check_test_cases()}
+    error1 = graph.check_test_cases()
+    failed_nodes = {"status": not error1, "not_covered_tests": error1}
 
     contents = create_report(graph, failed_nodes, '../export/output/report_module2')
     response = Response(content=contents, media_type="application/pdf")
